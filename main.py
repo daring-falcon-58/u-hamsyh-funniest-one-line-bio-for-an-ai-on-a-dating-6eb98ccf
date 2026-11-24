@@ -44,6 +44,11 @@ TARGET = OUTPUT_DIR / "entry.txt"
 def main() -> None:
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     TARGET.write_text(BIO, encoding="utf-8")
+    # Byte re-read self-check: the file on disk must be exactly the bio
+    # we intended, byte for byte. A truncated or altered write is a hard
+    # failure, not a silent pass — raise instead of shipping bad bytes.
+    if TARGET.read_bytes() != BIO.encode("utf-8"):
+        raise RuntimeError(f"{TARGET} does not match the intended bio bytes")
     print(f"Wrote {TARGET} ({len(BIO)} characters)")
 
 
